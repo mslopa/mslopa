@@ -3,6 +3,7 @@
 //app.use(bodyP.json())
 
 
+
 //const http = require('http');
 //const server = http.createServer(app);
 
@@ -24,38 +25,48 @@
 //{
  //   return res.status(400).json({success:false,error:"Empty code body"})
 //}
-
-const express = require('express');
+const express= require("express");
 const http = require('http');
-
-const cors = require("cors");
-const socketIo = require('socket.io');
-
-
 const app = express();
+const cors = require("cors");
+const socketIo = require("socket.io");
 
-app.use(cors())
-
+const bodyP = require("body-parser");
 const server = http.createServer(app);
-const io = socketIo(server, {
-      
-      cors: {
-         
-        origin: "*",
-        methods: ["GET", "POST"]
 
+const io = socketIo(server);
+  
+io.on('connection', (socket) => {
+  console.log('Client connected');
+
+  socket.on('executeCode', (code) => {
+    // Execute the code (simplified example using child_process.exec)
+    exec(code, (error, stdout, stderr) => {
+      if (error) {
+        socket.emit('output', stderr);
+      } else {
+        socket.emit('output', stdout);
       }
+    });
+  });
 })
 
-app.get('/', function(req,res) {
+app.use(bodyP.json())
 
-  res.send('Hello from the server')
+app.use("/", function (req,res) {
+
+     res.sendFile(" ")
 })
 
-const socketID_to_Users_Map = {}
-const roomID_to_Code_Map = {}
+app.get("/api",(req,res) => {
+       
+      res.send({message: "This is from server"})
+})
+app.listen(3000,() => {
 
-async function getUsersinRoom(roomid, io) {
+      console.log("server is running");
+})
+/*async function getUsersinRoom(roomid, io) {
 
   const socketList = await io.in(roomId).allSockets()
   const userlist = []
@@ -169,11 +180,4 @@ socket.on("disconnect", function(){
 
   console.log("A user disconnected")
 })
-
-const PORT = process.env.PORT || 3000
-
-
-io.listen(PORT , function(){
-
-       console.log(`listening on port:${PORT}`)
-})
+*/
